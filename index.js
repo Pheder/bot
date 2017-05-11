@@ -1,12 +1,7 @@
-var express = require('express');
-var app = express();
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
-});
+var telegraf = require('telegraf');
 
-var port = process.env.PORT || 5000;
-
-app.listen(port, function () {
-  console.log('Example app listening on port '+ port+'!');
-});
+var client = new telegraf(process.env.BOT_TOKEN);
+client.command('start', (ctx) => ctx.reply('Hey'));
+client.on('sticker', (ctx) => ctx.reply('👍'));
+client.startPolling();
