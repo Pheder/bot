@@ -2,14 +2,16 @@ var express = require('express');
 var app = express();
 var os = require('os');
 
-app.use(express.static('www'));
+app.set('port', (process.env.PORT || 5000));
+app.use(express.static(__dirname + '/www'));
+//app.set('views', __dirname + '/www');
 
 app.get('/', function (req, res) {
-  res.send('');
+ res.render('index');
 });
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+app.listen(app.get('port'), function () {
+  console.log('Example app listening on port '+ app.get('port')+'!');
 });
 
 /*var telegraf = require('telegraf');
