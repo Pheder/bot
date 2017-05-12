@@ -3,23 +3,54 @@
 navigator.getUserMedia = navigator.getUserMedia ||
     navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-var constraints = {
-  audio: false,
-  video: {width: {exact: 640}, height: {exact: 480}}
-};
-var video = document.querySelector('video');
+var videoElement = document.querySelector('video');
+var devices = [];
 
-function successCallback(stream) {
-  window.stream = stream; // stream available to console
-  if (window.URL) {
-    video.src = window.URL.createObjectURL(stream);
-  } else {
-    video.src = stream;
+function gotDevices(deviceInfos) {
+  // Handles being called several times to update labels. Preserve values.
+  for (var i = 0; i !== deviceInfos.length; ++i) {
+    var deviceInfo = deviceInfos[i];
+    if (deviceInfo.kind === 'videoinput') {
+      devices.push(deviceInfo.deviceId);
+    }
   }
 }
 
-function errorCallback(error) {
+navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+
+var pos = 0;
+
+function swapDevice(){
+  pos = (pos+1) %2;
+  start();
+}
+
+function gotStream(stream) {
+  window.stream = stream; // make stream available to console
+  videoElement.srcObject = stream;
+  // Refresh button list in case labels have become available
+  return navigator.mediaDevices.enumerateDevices();
+}
+
+function start() {
+  if (window.stream) {
+    window.stream.getTracks().forEach(function(track) {
+      track.stop();
+    });
+  }
+
+  var constraints = {
+    audio: false,
+    video: {deviceId: devices[pos] ,width: {exact: 640}, height: {exact: 480}}
+  };
+  navigator.mediaDevices.getUserMedia(constraints).
+      then(gotStream).then(gotDevices).catch(handleError);
+}
+
+
+
+function handleError(error) {
   console.log('navigator.getUserMedia error: ', error);
 }
 
-navigator.getUserMedia(constraints, successCallback, errorCallback);
+start();
