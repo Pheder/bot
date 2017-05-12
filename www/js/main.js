@@ -5,7 +5,7 @@ navigator.getUserMedia = navigator.getUserMedia ||
 
 var constraints = {
   audio: false,
-  video: true
+  video: {width: {exact: 640}, height: {exact: 480}}
 };
 var video = document.querySelector('video');
 
